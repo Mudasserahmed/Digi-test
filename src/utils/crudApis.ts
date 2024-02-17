@@ -43,7 +43,7 @@ export async function put<T>(url: string, data: RequestData): Promise<T> {
 }
 
 // Function to handle DELETE request
-export async function remove<T>(url: string): Promise<T> {
+export async function remove<T>(url: string ): Promise<T> {
   try {
     const response: AxiosResponse<T> = await axios.delete<T>(url);
     return response.data;
