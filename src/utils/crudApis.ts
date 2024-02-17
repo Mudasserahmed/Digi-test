@@ -1,6 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
 
-// Define types for request data and response data
 interface RequestData {
   [key: string]: any;
 }

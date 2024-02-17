@@ -14,18 +14,18 @@ import { addTodo, deleteTodo, setTodos, updateTodo } from "@/redux/features/todo
 const Main = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const allTodos = useSelector((state:any) => state?.todo?.todos)
-  
-  const userDataCookie = Cookies?.get("userData"); 
+  const allTodos = useSelector((state: any) => state?.todo?.todos)
+
+  const userDataCookie = Cookies?.get("userData");
   if (userDataCookie) {
     const decodedString = decodeURIComponent(userDataCookie);
     var userData = JSON.parse(decodedString);
   }
 
-  const [loading, setLoading] = useState(true);
-  const [todoValue, setTodoValue] = useState("")
+  const [loading, setLoading] = useState<boolean | null>(true);
+  const [todoValue, setTodoValue] = useState<string | null>("")
   const [editTodoId, setEditTodoId] = useState<number | null>(null);
-  const [editedTodo, setEditedTodo] = useState('');
+  const [editedTodo, setEditedTodo] = useState<string | null>('');
   useEffect(() => {
     getAllTodos()
     // Redirect to login page if user is not authenticated
@@ -86,8 +86,8 @@ const Main = () => {
       console.log(error)
     }
   }
-  
- 
+
+
   const handleEditTodo = (todoId: number, todo: string) => {
     setEditTodoId(todoId);
     setEditedTodo(todo);
@@ -95,12 +95,12 @@ const Main = () => {
   //handle edit todo
   const handleFinishEdit = async (todoId: number) => {
     const payload = {
-      completed:false,
-      todo:editedTodo
+      completed: false,
+      todo: editedTodo
     }
     try {
-      const response = await put(`https://dummyjson.com/todos/${todoId}`,payload)
-      if(response){
+      const response = await put(`https://dummyjson.com/todos/${todoId}`, payload)
+      if (response) {
         console.log(response)
         dispatch(updateTodo(response))
       }
@@ -136,50 +136,50 @@ const Main = () => {
             <Button onClick={handleAddTodo} sx={{ width: "130px", height: "50px" }} variant="outlined">Add Todo</Button>
           </Box>
           <ul style={{ listStyle: "none", height: "500px", overflowY: "scroll" }}>
-          {allTodos.slice().reverse().map((value, index) => (
-        <li key={index}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between', // Adjusted to evenly distribute items
-            width: '100%', // Ensures the box takes full width
-            maxWidth: '400px', // Adjust as needed for your design
-            margin: '0 auto', // Centers the box horizontally
-            padding: '8px', // Add padding for spacing
-          }}
-        >
-          {editTodoId === value.id ? (
-            <TextField
-              value={editedTodo}
-              onChange={(e) => setEditedTodo(e.target.value)}
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              type="todo"
-              onBlur={() => handleFinishEdit(value.id)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleFinishEdit(value.id);
-                }
-              }}
-              autoFocus
-            />
-          ) : (
-            <Typography>{value.todo}</Typography>
-          )}
-          <div>
-            <IconButton onClick={() => handleDeleteTodo(value.id)}>
-              <DeleteIcon />
-            </IconButton>
-            <IconButton onClick={() => handleEditTodo(value.id, value.todo)}>
-              <EditIcon />
-            </IconButton>
-          </div>
-        </Box>
-      </li>
-      
-      ))}
+            {allTodos.slice().reverse().map((value: any, index: number) => (
+              <li key={index}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    maxWidth: '400px',
+                    margin: '0 auto',
+                    padding: '8px',
+                  }}
+                >
+                  {editTodoId === value.id ? (
+                    <TextField
+                      value={editedTodo}
+                      onChange={(e) => setEditedTodo(e.target.value)}
+                      variant="outlined"
+                      fullWidth
+                      margin="normal"
+                      type="todo"
+                      onBlur={() => handleFinishEdit(value.id)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleFinishEdit(value.id);
+                        }
+                      }}
+                      autoFocus
+                    />
+                  ) : (
+                    <Typography>{value.todo}</Typography>
+                  )}
+                  <div>
+                    <IconButton onClick={() => handleDeleteTodo(value.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                    <IconButton onClick={() => handleEditTodo(value.id, value.todo)}>
+                      <EditIcon />
+                    </IconButton>
+                  </div>
+                </Box>
+              </li>
+
+            ))}
 
           </ul>
 
