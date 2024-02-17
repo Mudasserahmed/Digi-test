@@ -1,14 +1,22 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState } from "react";
-import { TextField, Button, Container, Typography, Box } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { TextField, Button, Container, Typography, Box, Alert } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { post } from "@/utils/crudApis";
+import Cookies from "js-cookie";
+
 const SignUp = () => {
   const router = useRouter();
   const [SignUpdata, setSignUpData] = useState({
-    email: "",
     userName: "",
+    firstName: "",
+    lastName: "",
+    age: 0,
     password: "",
   });
+  const [loading, setLoading] = useState(true); 
+  const [SignUpMessage,setSignUpMessage] = useState("")
+  const [SignUpError,setSignUpError] = useState("")
   //handling input change
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -17,11 +25,46 @@ const SignUp = () => {
       [name]: value,
     }));
   };
-  //handle login
-  const handleLogin = (e:any) => {
+  //handle SignUp
+  const handleSignUp = async (e: any) => {
     e.preventDefault();
-    console.log("signing up with:", SignUpdata);
+    try {
+      const response = await post(
+        "https://dummyjson.com/users/add",
+        SignUpdata
+      );
+      if (response) {
+        console.log(response);
+        setSignUpData({
+          userName: "",
+          firstName: "",
+          lastName: "",
+          age: 0,
+          password: "",
+        });
+        setSignUpMessage("User Created")
+        setTimeout(()=>{
+          router.push("/auth/login")
+        },2000)
+      }
+    } catch (error) {
+      console.log(error);
+      setSignUpError("error signing up")
+    }
   };
+  useEffect(() => {
+    const isLogged = Cookies.get("userData")
+    if (isLogged) {
+      router.push("/main");
+    }
+    else {
+      setLoading(false); // loading to false when authentication check is complete
+    }
+  }, [ router]);
+
+  if (loading) {
+    return null;
+  }
 
   return (
     <Box
@@ -41,23 +84,42 @@ const SignUp = () => {
         <Typography variant="h4" align="center" gutterBottom>
           SignUp
         </Typography>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSignUp}>
+          <TextField
+            name="firstName"
+            label="firstName"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={SignUpdata?.firstName}
+            onChange={(e) => handleChange(e)}
+          />
+          <TextField
+            name="lastName"
+            label="lastName"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={SignUpdata?.lastName}
+            onChange={(e) => handleChange(e)}
+          />
+          <TextField
+            name="age"
+            label="age"
+            variant="outlined"
+            fullWidth
+            type="number"
+            margin="normal"
+            value={SignUpdata?.age}
+            onChange={(e) => handleChange(e)}
+          />
           <TextField
             name="userName"
-            label="Username"
+            label="userName"
             variant="outlined"
             fullWidth
             margin="normal"
             value={SignUpdata?.userName}
-            onChange={(e) => handleChange(e)}
-          />
-          <TextField
-            name="email"
-            label="email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={SignUpdata?.email}
             onChange={(e) => handleChange(e)}
           />
           <TextField
@@ -85,10 +147,15 @@ const SignUp = () => {
             color="primary"
             fullWidth
             type="submit"
-            onClick={(e) => handleLogin(e)}
           >
             SignUp
           </Button>
+          {SignUpMessage !== "" && (
+          <Alert severity="success">{SignUpMessage}</Alert>
+        )}
+        {SignUpError !== "" && (
+          <Alert severity="error">{SignUpError}</Alert>
+        )}
         </form>
       </Container>
     </Box>

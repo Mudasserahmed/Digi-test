@@ -2,15 +2,15 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // interface for the LoginDetails object
 interface LoginDetails {
-  id: number;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  gender: string;
-  image: string;
-  token: string;
-}
+  id?: number;
+  username?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  gender?: string;
+  image?: string;
+  token?: string;
+} 
 
 // AuthState interface for Redux state
 interface AuthState {
@@ -33,13 +33,11 @@ export const auth = createSlice({
   reducers: {
     logout: () => initialState, 
     login: (state, action: PayloadAction<LoginDetails>) => {
-      return {
-        ...state,
-        isAuth: true,
-        loginDetails: action.payload,
-        uid: "ushdanjn1nji2ni3",
-        isModerator: false,
-      };
+      console.log("redux log",action.payload)        
+        state.isAuth = true,
+        state.loginDetails = action.payload,
+        state.uid = "ushdanjn1nji2ni3",
+        state.isModerator = false
     },
   },
 });

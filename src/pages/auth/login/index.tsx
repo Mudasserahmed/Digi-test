@@ -1,20 +1,34 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @next/next/no-img-element */
-import React, { useState } from "react";
-import { TextField, Button, Container, Typography, Box } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  TextField,
+  Button,
+  Container,
+  Typography,
+  Box,
+  Alert,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "@/redux/features/authSlice";
+import { login, loginSuccess } from "@/redux/features/authSlice";
 import { AppDispatch } from "@/redux/store";
-
+import { post } from "@/utils/crudApis";
+import Cookies from "js-cookie";
+// import { useSelector } from 'react-redux';
+import ProtectedRoute from "@/components/ProtectedRoute";
 const LoginForm = () => {
-  const dispatch = useDispatch<AppDispatch>()
-  const user = useSelector((state:any)=>state.authReducer.value)
-  console.log("user Details",user)
+  const dispatch = useDispatch<AppDispatch>();
+  // const loginDetails = useSelector((state: any) => state.authReducer);
   const router = useRouter();
+
   const [logindata, setLoginData] = useState({
     userName: "",
     password: "",
   });
+  const [loginMessage, setLoginMessage] = useState("");
+  const [apiError, setApiError] = useState("");
+  const [loading, setLoading] = useState(true); 
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -24,11 +38,51 @@ const LoginForm = () => {
     }));
   };
 
-  const handleLogin = (e:any) => {
-    e.preventDefault()
-    console.log("Logging in with:",logindata);
+  const handleLogin = async (e: any) => {
+    e.preventDefault();
+    const payload = {
+      username: logindata?.userName,
+      password: logindata?.password,
+    };
+    try {
+      const response: any = await post(
+        "https://dummyjson.com/auth/login",
+        payload
+      );
+      if (response) {
+        console.log(response);
+        setLoginData({
+          userName: "",
+          password: "",
+        });
+        setLoginMessage("login succesfull");
+        dispatch(login(response));
+        // cookies().set(response)
+        Cookies.set("userData", JSON.stringify(response));
+        localStorage.setItem("userData",JSON.stringify(response))
+        router.push("/main");
+      }
+    } catch (error) {
+      console.log(error);
+      setApiError(error?.response?.data?.message);
+    }
+    console.log("Logging in with:", logindata);
   };
 
+  useEffect(() => {
+    const isLogged = Cookies.get("userData")
+    if (isLogged) {
+      router.push("/main");
+    }
+    else {
+      setLoading(false); // loading to false when authentication check is complete
+    }
+  }, [ router]);
+
+  if (loading) {
+    return null;
+  }
+ 
   return (
     <Box
       display="flex"
@@ -56,6 +110,7 @@ const LoginForm = () => {
             margin="normal"
             value={logindata?.userName}
             onChange={(e) => handleChange(e)}
+            
           />
           <TextField
             name="password"
@@ -87,9 +142,13 @@ const LoginForm = () => {
             Login
           </Button>
         </form>
+        {loginMessage !== "" && (
+          <Alert severity="success">{loginMessage}</Alert>
+        )}
+        {apiError !== "" && <Alert severity="error">{apiError}</Alert>}
       </Container>
     </Box>
   );
 };
 
-export default LoginForm;
+export default LoginForm
